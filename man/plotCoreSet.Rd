@@ -4,35 +4,41 @@
 \alias{plotCoreSet}
 \title{Plot Core Set for cooperative production linear games.}
 \usage{
-plotCoreSet(game, owenPoint)
+plotCoreSet(c, A, B)
 }
 \arguments{
-\item{game}{vector that represents a cooperative linear production game.}
+\item{c}{vector containing the benefits of the products.}
 
-\item{owenPoint}{matrix with allocations of Owen Set.}
+\item{A}{production matrix.}
+
+\item{B}{matrix containing the amount of resources of the several players 
+where each row is one player.}
 }
 \value{
 \code{plotCoreSet} returns a \code{ggplot} object with the imputation set
 of the game, the core and the most common solutions.
 }
 \description{
-Given a linear production game \code{A \%*\% x <= b(S)}, the 
-\code{plotCoreSet} plots the imputation Set, Core Set and the most common
-solutions (Nucleoulus, Shapley Value and allocations 
-of Owen Set.)
+Given a linear production game, the 
+\code{plotCoreSet} function plots the imputation Set, Core Set and the most common
+solutions (Nucleolus, Shapley Value and allocations 
+of the Owen Set).
 }
 \details{
-This function plots all allocations of Owen Set. If we have multiple 
-allocations, we should pass the ends of the segment that represents all 
-the possible allocations.
+In most cases the Owen Set consists of a single allocation, but in some cases there are infinities.
+In the case that there are infinite allocations, if the problem has two dimensions, 
+they will be given by a line, which we will represent graphically.
+If the problem has more than two dimensions, an allocation of all possible ones will be represented.
 }
 \examples{
-# Game
-game <- c(68,102,0,170,710,762,992)
-# Owen allocation of the game
-owenPoint <- matrix(c(230, 282, 480), nrow = 1)
-# Plot Core set
-plotCoreSet(game, owenPoint)
+# Vector of benefits
+c <- c(68, 52)
+# Production matrix
+A <- matrix(c(4, 5, 6, 2), ncol = 2, byrow = TRUE)
+# Matrix of resources. Each row is the vector of resources of each player
+B <- matrix(c(4, 6, 60, 33, 39, 0), ncol = 3, byrow = TRUE)
+# Solution of the associated linear production game
+plotCoreSet(c, A, B)
   
   
 }

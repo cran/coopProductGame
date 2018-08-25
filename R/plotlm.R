@@ -6,16 +6,16 @@
 # plotlm ----------------------------------------------------------------------
 #' Plot method for linear production programming problems
 #' 
-#' This function plot the graphical solution of simple linear production 
-#' programming problem \code{A \%*\% x <= b} with two decision 
-#' variables. The decision variables must be real, nonnegative and must not 
+#' This function plots the graphical solution of simple linear production 
+#' programming problems with two decision 
+#' variables. The decision variables must be real, nonnegative and cannot 
 #' have a finite upper bound. Only inequality constraints are supported.
 #' 
 #' @param prod a linear production programming problem of class \code{lpExtPtr}.
 #' @param A production matrix.
 #' @param b vector of resources.
 #' @param c vector of benefits.
-#' @param title title of plot. By default is \code{NULL}, so it returns a plot
+#' @param title title of the plot. By default is \code{NULL}, so it returns a plot
 #' without title.
 #'
 #' @return Returns and plot a \code{ggplot} object with graphical solution of 

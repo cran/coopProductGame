@@ -14,11 +14,11 @@
 #' @param A production matrix.
 #' @param b vector of resources.
 #' @param plot logical value indicating  if the function displays graphical 
-#' solution (\code{TRUE}) or not (\code{FALSE}). Note that this option only make 
+#' solution (\code{TRUE}) or not (\code{FALSE}). Note that this option only makes 
 #' sense when we have a two-dimension problem.
 #' @param show.data logical value indicating if the function displays the 
 #' console output (\code{TRUE}) or not (\code{FALSE}). By default the 
-#' value is \code{TRUE}
+#' value is \code{TRUE}.
 #'
 #' @return \code{productLinearProblem} returns and prints a list with the 
 #' following components:

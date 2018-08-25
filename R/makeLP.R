@@ -6,15 +6,14 @@
 # makeLP ----------------------------------------------------------------------
 #' Make a linear production programming problem
 #' 
-#' Given a linear production problem \code{A \%*\% x <= B}, the
-#' \code{coopProductGame} solves the problem by making use of lpSolveAPI
-#' where each agent provides his own resources. 
+#' Given a linear production problem \code{A \%*\% x <= b}, the
+#' \code{makeLP} function creates a new \code{lpSolve} linear program model object.
 #' 
 #' @param c vector of benefits.
 #' @param A production matrix.
 #' @param b vector of resources.
 #'
-#' @return \code{makeLP} returns a lpSolve linear program model object. 
+#' @return \code{makeLP} returns a \code{lpSolve} linear program model object. 
 #' Specifically an R external pointer with class \code{lpExtPtr}.
 #' 
 #' @examples

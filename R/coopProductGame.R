@@ -12,10 +12,10 @@
 #' 
 #' @param c vector containing the benefits of the products.
 #' @param A production matrix.
-#' @param b matrix containing the amount of resources of the several players 
+#' @param B matrix containing the amount of resources of the several players 
 #' where each row is one player.
-#' @param plot logical value indicating  if the function displays graphical 
-#' solution (\code{TRUE}) or not (\code{FALSE}). Note that this option only make 
+#' @param plot logical value indicating if the function displays graphical 
+#' solution (\code{TRUE}) or not (\code{FALSE}). Note that this option only makes
 #' sense when we have a two-dimension problem.
 #' @param show.data logical value indicating if the function displays the 
 #' console output (\code{TRUE}) or not (\code{FALSE}). By default the 
@@ -31,13 +31,13 @@
 #' 
 #' @examples
 #' # Vector of benefits
-#' c <- c(68,52)
+#' c <- c(68, 52)
 #' # Production matrix
-#' A <- matrix(c(4,5,6,2),ncol=2, byrow = TRUE)
+#' A <- matrix(c(4, 5, 6, 2), ncol = 2, byrow = TRUE)
 #' # Matrix of resources. Each row is the vector of resources of each player
-#' b <- matrix(c(4,33,6,39,60,0),ncol=2, byrow = TRUE)
+#' B <- matrix(c(4, 6, 60, 33, 39, 0), ncol = 3, byrow = TRUE)
 #' # Solution of the associated linear production game
-#' coopProductGame(c,A,b, show.data = TRUE)
+#' coopProductGame(c, A, B, show.data = TRUE)
 #' 
 #'  # ------------------------------------------------------------------------
 #'  # Optimal solution of the problem for each coalition: 
@@ -73,130 +73,96 @@
 #' @export
 
 
-coopProductGame <- function(c, A, b, plot=FALSE, show.data=FALSE){
+coopProductGame <- function(c, A, B, plot=FALSE, show.data=FALSE){
   
-  coa <- coalitions(dim(b)[1])
-  coa1 <- coa$Binary
-  coa2 <- coa$Usual
-  
-  juego <- data.frame(0)
-  colnames(juego) <- c("S={0}")
-  barx <- data.frame()
-  plots <- list()
-  for (i in 2:dim(coa1)[1]){
-    pos<-which(coa1[i,]!=0)
-    
-    if(length(pos)==1){
-      bs <- b[pos,]
-    }else{
-      bs <- apply(b[pos,],2,sum)
-    }
-    
-    prod <- makeLP(c, A, bs)
-    juego[i] <- get.objective(prod)
-    colnames(juego)[i] <- paste0("S={", paste0(strsplit(as.character(coa2[i]), split = "")[[1]], collapse = ","),"}")
-    barx <- rbind(barx, get.variables(prod))
-    rownames(barx)[i-1] <- paste0("S={", paste0(strsplit(as.character(coa2[i]), split = "")[[1]], collapse = ","),"}")
-    
-    if (plot==T){
-      plots[[i-1]] <- plotlm(prod, A, bs, c, coa2[i])
-    }
-    
-    if(length(pos)== dim(b)[1]){
-      
-      if(nrow(A)>2){
-        dual <- get.dual.solution(prod)[2:(dim(b)[2]+1)]
-        Owen <- t(b %*% dual)
-      }else{
-        dim_aux <- dim(A)[2]
-        
-        A_dual <- cbind(t(A), -diag(dim_aux))
-        b_dual <- c
-        c_dual <- c(bs, rep(0,dim_aux))
-        
-        m <- dim(A_dual)[1]
-        n <- dim(A_dual)[2]
-        
-        bs <- b_dual
-        c <- c(c_dual, rep(0,m))
-        A <- cbind(A_dual, diag(m))
-        init = c(rep(0, n), b_dual)
-        basic = n + (1:m)
-        
-        n1 <- n
-        
-        out1 <- getDualSolution(a = c, A = A, b = bs, init = init, basic = basic, n1=n1)
-        
-        Owen <- data.frame()
-        
-        for(i in 1:nrow(out1)){
-          Owen <- rbind(Owen, t(b %*% as.numeric(out1[i,])))
-        }
-      }
-    }
-  }
   
   if(plot==TRUE){
-    numPlots = length(plots)
-    layout <- matrix(seq(1, 2 * ceiling(numPlots/2)),
-                     ncol = 2, nrow = ceiling(numPlots/2), byrow = TRUE)
-    grid.newpage()
-    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
-    
-    # Make each plot, in the correct location
-    for (i in 1:numPlots) {
-      # Get the i,j matrix positions of the regions that contain this subplot
-      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
-      
-      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
-                                      layout.pos.col = matchidx$col))
-    }
+    aux <- print(linearProductionGame(c, A, B, plot=TRUE))
+  }else{
+    aux <- linearProductionGame(c, A, B)
   }
   
-  rownames(juego) <- c("Associated game")
-  colnames(barx) <- rep("", ncol(barx))
+  
+  game <- aux$game
+  sol <- aux$Sol
+  
+  rownames(game) <- c("Associated game")
+  
+ 
+  shapleyValue <- shapleyValue(game[-1])
+  nucleolo <- nucleolus(game[-1])
+  Owen <- owenSet(c, A, B)
+  
   
   if(show.data){
     
-    auxOwen <- as.data.frame(Owen)
+    auxOwen <- as.data.frame(Owen$Owen)
     colnames(auxOwen) <- c()
     rownames(auxOwen) <- c()
     
     cat(" ------------------------------------------------------------------------\n")
     cat(" Optimal solution of the problem for each coalition: \n")
     cat(" ------------------------------------------------------------------------\n")
-    print(round(barx,2))
+    print(round(sol,2))
     cat("\n")
     cat(" ------------------------------------------------------------------------\n")
     cat(" Cooperative production game: \n")
     cat(" ------------------------------------------------------------------------\n")
-    print(juego)
+    print(game)
     cat(" ------------------------------------------------------------------------\n")
     cat("\n")
-    if(nrow(auxOwen) == 1){
+    if(nrow(auxOwen) == 1 & Owen$multipleSolutions == 0){
       cat(" ------------------------------------------------------------------------\n")
-      owenPrint <- paste0("(", auxOwen[1], ", ", auxOwen[2], ", ", auxOwen[3], ")")
-      cat("The game has a unique Owen's allocation:\n")
+      owenPrint <- paste0("(", paste(auxOwen, collapse = ", "), ")")
+      cat("The linear production problem has a unique Owen's allocation:\n")
       cat(" ------------------------------------------------------------------------\n")
       print(owenPrint)
     }
     
-    if(nrow(auxOwen) == 2){
-      cat(" ------------------------------------------------------------------------\n")
-      cat("The game has multiple Owen's allocations \n")
-      cat("All the points betwen the following are allocations of Owen Set: \n")
-      cat(" ------------------------------------------------------------------------\n")
-      owenPrint1 <- paste0("(", auxOwen[1,1], ", ", auxOwen[1,2], ", ", auxOwen[1,3], ")")
-      owenPrint2 <- paste0("(", auxOwen[2,1], ", ", auxOwen[2,2], ", ", auxOwen[2,3], ")")
-      print(owenPrint1)
-      print(owenPrint2)
+    if(nrow(auxOwen) == 2 || Owen$multipleSolutions == 1){
+      
+      if(nrow(auxOwen) == 2){
+        cat(" ------------------------------------------------------------------------\n")
+        cat("The linear production problem has multiple Owen's allocations \n")
+        cat("All the points between the following are allocations of the Owen Set: \n")
+        cat(" ------------------------------------------------------------------------\n")
+        owenPrint1 <- paste0("(", paste(auxOwen[1,], collapse = ", "), ")")
+        owenPrint2 <- paste0("(", paste(auxOwen[2,], collapse = ", "), ")")
+        print(owenPrint1)
+        print(owenPrint2)
+      }else{
+        cat(" ------------------------------------------------------------------------\n")
+        cat("The linear production problem has multiple Owen's allocations \n")
+        cat("One of them is the following \n")
+        cat(" ------------------------------------------------------------------------\n")
+        owenPrint1 <- paste0("(", paste(auxOwen[1,], collapse = ", "), ")")
+        print(owenPrint1)
+      }
     }
     cat(" ------------------------------------------------------------------------\n")
+    cat("\n")
+    cat(" ------------------------------------------------------------------------\n")
+    cat(" Shapley: \n")
+    cat(" ------------------------------------------------------------------------\n")
+    shapleyPrint <- paste0("(", paste(round(shapleyValue,3), collapse = ", "), ")")
+    print(shapleyPrint)
+    cat(" ------------------------------------------------------------------------\n")
+    cat("\n")
+    
+    cat(" ------------------------------------------------------------------------\n")
+    cat(" Nucleolus: \n")
+    cat(" ------------------------------------------------------------------------\n")
+    nucleoloPrint <- paste0("(", paste(round(nucleolo, 3), collapse = ", "), ")")
+    print(nucleoloPrint)
+    cat(" ------------------------------------------------------------------------\n")
+    
   }
   
+  colnames(Owen$Owen) <- seq(1:ncol(Owen$Owen))
   
   
-  invisible(list(Sol = round(barx,2), Valor_obj = as.numeric(juego), Owen = Owen))
+  invisible(list(Sol = round(sol,2), game = as.numeric(game), Owen = Owen$Owen, 
+                 Shapley = shapleyValue, Nucleolus = nucleolo))
   
   
 }

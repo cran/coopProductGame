@@ -9,7 +9,7 @@
 \tabular{ll}{
 Package: \tab coopProductGame\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
+Version: \tab 2.0\cr
 Date: \tab 2018-07-01\cr
 License: \tab GPL-3\cr
 }
@@ -22,16 +22,17 @@ Maintainer: Daniel Prieto Rodríguez <daniel.prieto.rodriguez89@gmail.com>
 }
 \references{
 
-Gillies. D. B. Some Theorems on n-Person Games. PhD thesis, Princeton University, 1953.
+S. Cano-Berlanga, J. M. Gimenez-Gomez, and C. Vilella. Enjoying cooperative games: The r package gametheory. Working Paper No. 06; CREIP; Spain, March 2015.
 
-Owen. G. On the core of linear production games. Mathematical Programming, 9:358–370, 1975.
+D. B. Gillies. Some Theorems on n-Person Games. PhD thesis, Princeton University, 1953.
 
-Schmeidler. D. The nucleolus of a characteristic function game. SIAM Jounal of Applied Mathematics, 17:1163–1170, 1969.
+G. Owen. On the core of linear production games. Mathematical Programming, 9:358–370, 1975.
 
-Shapley, L.S. (1953). A value por n-person games. In H. Kuhn y A. Tucker (eds), Contributions to
-the theory of games II, Vol. 28, Annals of Mathematics Studies. Princeton University Press
+D. Schmeidler. The nucleolus of a characteristic function game. SIAM Jounal of Applied Mathematics, 17:1163–1170, 1969.
 
-van Gellekom J. R. G. et al. Characterization of the owen set of linear production processes. Games and Economic Behavior, 32:139–156, 2000.
+L. S. Shapley. A value for n-person games. Contributions to the theory games II, 28:124–131, 1953.
+
+J. R. G. van Gellekom et al. Characterization of the owen set of linear production processes. Games and Economic Behavior, 32:139–156, 2000.
 
 }
 \encoding{UTF-8}

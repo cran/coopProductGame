@@ -14,13 +14,12 @@ makeLP(c, A, b)
 \item{b}{vector of resources.}
 }
 \value{
-\code{makeLP} returns a lpSolve linear program model object. 
+\code{makeLP} returns a \code{lpSolve} linear program model object. 
 Specifically an R external pointer with class \code{lpExtPtr}.
 }
 \description{
-Given a linear production problem \code{A\%*\%x <= B}, the
-\code{coopProductGame} solves the problem by making use of lpSolveAPI
-where each agent provides his own resources.
+Given a linear production problem \code{A \%*\% x <= b}, the
+\code{makeLP} function creates a new \code{lpSolve} linear program model object.
 }
 \examples{
 # Vector of benefits

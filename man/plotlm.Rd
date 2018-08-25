@@ -15,7 +15,7 @@ plotlm(prod, A, b, c, title = NULL)
 
 \item{c}{vector of benefits.}
 
-\item{title}{title of plot. By default is \code{NULL}, so it returns a plot
+\item{title}{title of the plot. By default is \code{NULL}, so it returns a plot
 without title.}
 }
 \value{
@@ -23,9 +23,9 @@ Returns and plot a \code{ggplot} object with graphical solution of
 the problem.
 }
 \description{
-This function plot the graphical solution of simple linear production 
-programming problem \code{A \%*\% x <= b} with two decision 
-variables. The decision variables must be real, nonnegative and must not 
+This function plots the graphical solution of simple linear production 
+programming problems with two decision 
+variables. The decision variables must be real, nonnegative and cannot 
 have a finite upper bound. Only inequality constraints are supported.
 }
 \examples{

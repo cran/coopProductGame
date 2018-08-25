@@ -14,12 +14,12 @@ productLinearProblem(c, A, b, plot = FALSE, show.data = FALSE)
 \item{b}{vector of resources.}
 
 \item{plot}{logical value indicating  if the function displays graphical 
-solution (\code{TRUE}) or not (\code{FALSE}). Note that this option only make 
+solution (\code{TRUE}) or not (\code{FALSE}). Note that this option only makes 
 sense when we have a two-dimension problem.}
 
 \item{show.data}{logical value indicating if the function displays the 
 console output (\code{TRUE}) or not (\code{FALSE}). By default the 
-value is \code{TRUE}}
+value is \code{TRUE}.}
 }
 \value{
 \code{productLinearProblem} returns and prints a list with the 

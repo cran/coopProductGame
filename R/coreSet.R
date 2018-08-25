@@ -140,7 +140,7 @@ linesIntersec <- function(coreSet, l11, l12, l21, l22){
 }
 
 # shapleyValue -------------------------------------------------------------
-shapleyValue <- function (x){
+shapleyValueInt <- function (x){
   
   z <- as.matrix(x$Lex)
   z <- as.vector(z)

@@ -6,19 +6,22 @@
 # plotCoreSet -----------------------------------------------------------------
 #' Plot Core Set for cooperative production linear games.
 #' 
-#' Given a linear production game \code{A \%*\% x <= b(S)}, the 
-#' \code{plotCoreSet} plots the imputation Set, Core Set and the most common
-#' solutions (Nucleoulus, Shapley Value and allocations 
-#' of Owen Set.)
+#' Given a linear production game, the 
+#' \code{plotCoreSet} function plots the imputation Set, Core Set and the most common
+#' solutions (Nucleolus, Shapley Value and allocations 
+#' of the Owen Set).
 #' 
 #' 
 #' 
-#' This function plots all allocations of Owen Set. If we have multiple 
-#' allocations, we should pass the ends of the segment that represents all 
-#' the possible allocations.
+#' In most cases the Owen Set consists of a single allocation, but in some cases there are infinities.
+#' In the case that there are infinite allocations, if the problem has two dimensions, 
+#' they will be given by a line, which we will represent graphically.
+#' If the problem has more than two dimensions, an allocation of all possible ones will be represented.
 #' 
-#' @param game vector that represents a cooperative linear production game.
-#' @param owenPoint matrix with allocations of Owen Set.
+#' @param c vector containing the benefits of the products.
+#' @param A production matrix.
+#' @param B matrix containing the amount of resources of the several players 
+#' where each row is one player.
 #'
 #' @return \code{plotCoreSet} returns a \code{ggplot} object with the imputation set
 #' of the game, the core and the most common solutions.
@@ -29,12 +32,14 @@
 #' 
 #' 
 #' @examples
-#' # Game
-#' game <- c(68,102,0,170,710,762,992)
-#' # Owen allocation of the game
-#' owenPoint <- matrix(c(230, 282, 480), nrow = 1)
-#' # Plot Core set
-#' plotCoreSet(game, owenPoint)
+#' # Vector of benefits
+#' c <- c(68, 52)
+#' # Production matrix
+#' A <- matrix(c(4, 5, 6, 2), ncol = 2, byrow = TRUE)
+#' # Matrix of resources. Each row is the vector of resources of each player
+#' B <- matrix(c(4, 6, 60, 33, 39, 0), ncol = 3, byrow = TRUE)
+#' # Solution of the associated linear production game
+#' plotCoreSet(c, A, B)
 #'   
 #'   
 #' @export
@@ -42,7 +47,11 @@
 #' @importFrom utils capture.output
 #' @importFrom grDevices chull
 
-plotCoreSet <- function(game, owenPoint) {
+plotCoreSet <- function(c, A, B) {
+  
+  aux <- linearProductionGame(c, A, B)
+  game <- round(as.numeric(aux$game)[-1],4)
+  owenPoint <- owenSet(c, A, B)$Owen
   
   V1 = NULL
   V2= NULL
@@ -56,18 +65,18 @@ plotCoreSet <- function(game, owenPoint) {
   }
   imputationSet2D <- as.data.frame(imputationSet2D)
   imputationSet2D <- imputationSet2D%>%
-    dplyr::mutate(posh = ifelse(V1 == min(V1), 0.3, ifelse(V1 == max(V1), 0.6, 0.5)),
-                  posv = ifelse(V2 == max(V2), -0.5, 1.2))
+    dplyr::mutate(posh = 0.5,
+                  posv = ifelse(V2 == max(V2), -1, 2))
   
-  vertexLabels <- paste0( "(", imputationSet[,1], ",", imputationSet[,2], ",", imputationSet[,3], ")")
+  vertexLabels <- paste0( "(", round(imputationSet[,1],2), ",", round(imputationSet[,2],2), ",", round(imputationSet[,3],2), ")")
   rownames(imputationSet2D) <- vertexLabels
   
   gameDef <- GameTheory::DefineGame(3, game)
   invisible(capture.output(nucleolo <- suppressWarnings(GameTheory::Nucleolus(gameDef)$nucleolus)))
-  nucleoulus <- nucleolo[,"x(S)"]
+  nucleoulus <- round(nucleolo[,"x(S)"],2)
   nucleoulus2D <- data.frame(t(point3Dto2D(nucleoulus, 30, 30)),
                              textG = paste0( "(", nucleoulus[1], ",", nucleoulus[2], ",", nucleoulus[3], ")"))
-  shapleyValue <- shapleyValue(gameDef)$SV
+  shapleyValue <- round(shapleyValueInt(gameDef)$SV,2)
   shapley2D <-  data.frame(t(point3Dto2D(shapleyValue, 30, 30)),
                            textG = paste0( "(", shapleyValue[1,], ",", shapleyValue[2,], ",", shapleyValue[3,], ")"))
   
@@ -79,13 +88,13 @@ plotCoreSet <- function(game, owenPoint) {
   
   if(nrow(owenPoint) == 1){
     owen2D <- data.frame(t(point3Dto2D(owenPoint, 30, 30)),
-                         textG = paste0( "(", owenPoint[1], ",", owenPoint[2], ",", owenPoint[3], ")"))
+                         textG = paste0( "(", round(owenPoint[1],2), ",", round(owenPoint[2],2), ",", round(owenPoint[3],2), ")"))
   }else if(nrow(owenPoint) == 2){
     owen2D <- matrix(ncol=2, nrow = 2)
     namesOwen <- matrix(ncol = 1, nrow = 2)
     for(i in 1:nrow(owenPoint)){
       aux <- as.numeric(t(point3Dto2D(owenPoint[i,], 30, 30)))
-      textO = paste0( "(", owenPoint[i,1], ",", owenPoint[i,2], ",", owenPoint[i,3], ")")
+      textO = paste0( "(", round(owenPoint[i,1],2), ",", round(owenPoint[i,2],2), ",", round(owenPoint[i,3],2), ")")
       owen2D[i,] <-  aux
       namesOwen[i,] <- textO
       
@@ -106,8 +115,8 @@ plotCoreSet <- function(game, owenPoint) {
     
     pos <- which(dist(solutions2)<10)
     
-    if(pos == 1){
-      aj = c(1.5 ,-0.5, -0.5)
+    if(any(pos == 1)){
+      aj = c(-0.5 , 1.5, -0.5)
     }else{
       aj = c(-0.5,-0.5,1.5)
     }
@@ -118,11 +127,16 @@ plotCoreSet <- function(game, owenPoint) {
   
   SolutionPoints <- solutions$names
   
+  margin <- (max(imputationSet2D$V1) - min(imputationSet2D$V1))/10
+  margin2 <- (max(imputationSet2D$V2) - min(imputationSet2D$V2))/10
+  
   core <- ggplot2::ggplot()+
     ggplot2::geom_polygon(data=imputationSet2D, ggplot2::aes(x=V1,y=V2),fill="grey90", colour = "black", size = 1)+
     ggplot2::geom_point(data=imputationSet2D, ggplot2::aes(x=V1,y=V2),colour="black")+
     ggplot2::geom_text(data = imputationSet2D, ggplot2::aes(x=V1,y=V2), label = rownames(imputationSet2D),hjust=imputationSet2D$posh, vjust=imputationSet2D$posv, size = 4) +
-    ggplot2::geom_polygon(data = as.data.frame(coreset2d[chull(coreset2d),]), ggplot2::aes(x=V1,y=V2), fill = "grey68", colour = "black", size = 1)
+    ggplot2::geom_polygon(data = as.data.frame(coreset2d[chull(coreset2d),]), ggplot2::aes(x=V1,y=V2), fill = "grey68", colour = "black", size = 1)+
+    ggplot2::scale_x_continuous(limits = c(min(imputationSet2D$V1)-margin, max(imputationSet2D$V1)+margin))+
+    ggplot2::scale_y_continuous(limits = c(min(imputationSet2D$V2)-margin2, max(imputationSet2D$V2)+margin2))
   
   if(nrow(solutions)>3){
     owenSegment <- solutions[which(solutions$names == "Owen Allocation"),]

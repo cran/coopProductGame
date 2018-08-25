@@ -15,7 +15,7 @@ A list with the following components:
 \item{\code{Binary}}{Matrix where each row is a binary representation of the 
 coalition.}
  
-\item{\code{Usual}}{Vector with the usual representatios of the coalitions.}
+\item{\code{Usual}}{Vector with the usual configurations of the coalitions.}
 }
 \description{
 This functions gives all the coalitions, including the empty coalition,
